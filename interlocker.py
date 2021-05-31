@@ -92,47 +92,22 @@ def main():
     conf = JsonConfigFileManager('./config/Log_interlocker_config.json').values
     total_log = extract_log_from_file('session','test.log',conf)
 
-    start = time.time()
-    criterion = 10000
     mem = MemoryStore()
     tmp_list = extract_ip_from_file(total_log,mem)
     total_log = total_log.splitlines()
-    print(time.time() -start)
-    start = time.time()
-    # for times in range((len(total_log)//criterion)+1):
-    
-    #     standard = times*criterion
-    #     next = (times+1)*criterion
-    #     tmp_list = list()
-    #     if next >= len(total_log):
-    #         next = -1
-    #     for line in total_log[standard:next]:
-        
-            # returnVal = convert_log_to_STIX2(logs,mem)
-            # mem.add(returnVal)
-            # for obj in returnVal:
-            #     tmp_list.append(obj.serialize())
+
     
     for line in total_log:
         logs = logParser(line)
-
         tmp_list.append(convert_log_to_STIX_traffic(logs,mem))
-    
-    # dump = json.loads(Bundle(tmp_list).serialize())
-    
-    # tmp_list = list({v['id']:v for v in tmp_list}.values())
-    # print(tmp_list)
     dump = json.loads(Bundle(tmp_list).serialize())
-    # print('-')
-    print(time.time() -start)
-    start = time.time()
+
+
     with open('{}/{}.json'.format('test','test'), 'w', encoding='utf-8') as f:
         json.dump((dump),f, indent="\t")
-    # mem.save_to_file("./test/test{}.json".format(times))
-    print('save')
+
     del mem
     gc.collect()
-    print(time.time() -start)
 
 
 if __name__ == '__main__':
