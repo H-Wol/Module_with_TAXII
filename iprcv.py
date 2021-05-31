@@ -39,7 +39,14 @@ def select_api_root(url,taxii,conf):
 def main():
     config = JsonConfigFileManager('./config/IP_collect_config.json').values
     
+
     for server in config:
+        conf = config[server]
+        taxii = load_module_func("taxii2client.{}".format(conf.version.TAXII))
+
+        url = configure_url(conf)
+
+        if confirm_Connection(conf,taxii):
             error_logger.error("Server Connection Error {}".format(url))
             continue
 
@@ -59,7 +66,6 @@ def main():
                 url = select_collection(url,taxii,conf)
             if not url:
                 continue
-            print(url)
             collection = taxii.Collection(url,user=conf.id, password=conf.pw)
 
             if not collection.can_read:
@@ -70,7 +76,7 @@ def main():
             collection_objects = list()
             objects = collection.get_objects()
             while 1:
-                print('while?')
+                
                 if not objects:
                     break
                 # collection_objects.add(objects['objects'])
@@ -84,7 +90,7 @@ def main():
             # collection_objects.save_to_file('{}/{}.json'.format(COLLECTION_SAVE_DIR,collection.id))
             with open('{}/{}.json'.format(COLLECTION_SAVE_DIR,collection.id), 'w', encoding='utf-8') as f:
                 json.dump(collection_objects,f, indent="\t")
-            print('done')
+            
 
 if __name__ == '__main__':
     main()
