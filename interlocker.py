@@ -10,8 +10,9 @@ from logger import error_logger
 from urllib.parse import urlparse
 from stix2 import IPv4Address, Bundle, NetworkTraffic, MemoryStore, Filter
 from config.ConfigManager import JsonConfigFileManager
+from utils import JsonConfigFileManager, load_module_func, configure_url, confirm_Connection, add_slash, del_slash
 
-COLLECTION_SAVE_DIR = './interlocker'
+STIX_SAVE_DIR = './STIX/'
 
 LOG_DIR = './log/'
 
@@ -86,12 +87,7 @@ def extract_log_from_file(log_type,log_name,conf):
     total_log = open_log_file(log_name)
     return total_log
 
-
-
-def main():
-    conf = JsonConfigFileManager('./config/Log_interlocker_config.json').values
-    total_log = extract_log_from_file('session','test.log',conf)
-
+def transform_log_to_file(conf,total_log):
     mem = MemoryStore()
     tmp_list = extract_ip_from_file(total_log,mem)
     total_log = total_log.splitlines()
@@ -102,13 +98,49 @@ def main():
         tmp_list.append(convert_log_to_STIX_traffic(logs,mem))
     dump = json.loads(Bundle(tmp_list).serialize())
 
+    now = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
 
-    with open('{}/{}.json'.format('test','test'), 'w', encoding='utf-8') as f:
+    with open('{}{}.json'.format(STIX_SAVE_DIR,now), 'w', encoding='utf-8') as f:
         json.dump((dump),f, indent="\t")
 
     del mem
     gc.collect()
 
+def upload(conf):
+
+    taxii = load_module_func("taxii2client.{}".format(conf.version.TAXII))
+
+    url = configure_url(conf)
+
+    if confirm_Connection(conf,taxii):
+        error_logger.error("Server Connection Error {}".format(url))
+        return 0
+
+    url = configure_url(conf,'collection',conf)
+    
+    collection = taxii.Collection(url,user=conf.id, password=conf.pw)
+
+    if not collection.can_write:
+        error_logger.error("Selected collection cannot be written. URL : {}".format(url))
+        return 0
+    for bundle in os.listdir(STIX_SAVE_DIR):
+        print(os.path.join(STIX_SAVE_DIR,bundle))
+        with open(os.path.join(STIX_SAVE_DIR,bundle)) as json_file:
+            stix_bundle = json.load(json_file)
+        try:
+            collection.add_objects(stix_bundle)
+        except Exception as e:
+            error_logger.error("Upload Failed. Bundle : {}".format(bundle))
+            continue
+        os.system('rm {}'.format(os.path.join(STIX_SAVE_DIR,bundle)))
+
+
+def main():
+    conf = JsonConfigFileManager('./config/Log_interlocker_config.json').values
+    total_log = extract_log_from_file('session','test.log',conf)
+    transform_log_to_file(conf,total_log)
+    
+    upload(conf)
 
 if __name__ == '__main__':
     main()
