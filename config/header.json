@@ -1,0 +1,10 @@
+{
+    "v21": {
+        "Accept": "application/taxii+json;version=2.1",
+        "Content-Type": "application/taxii+json;version=2.1"
+    },
+    "v20": {
+        "Accept": "application/taxii+json;version=2.0",
+        "Content-Type": "application/taxii+json;version=2.0"
+    }
+}

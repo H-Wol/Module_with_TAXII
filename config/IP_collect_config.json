@@ -1,0 +1,45 @@
+{
+    "anomali": {
+        "protocol": "https",
+        "dicovery_url": "limo.anomali.com/api/v1/taxii2/",
+        "id": "guest",
+        "pw": "guest",
+        "detail": {
+            "1": {
+                "api_root": "feeds",
+                "collection": "135"
+            },
+            "2": {
+                "api_root": "feeds",
+                "collection": "150"
+            }
+        },
+        "version": {
+            "TAXII": "v20",
+            "STIX": "v20"
+        },
+        "retry": 2
+    },
+    "Test": {
+        "protocol": "http",
+        "host": "10.0.2.2",
+        "port": 5000,
+        "retry": 5,
+        "id": "admin",
+        "pw": "Password0",
+        "detail": {
+            "1": {
+                "api_root": "trustgroup1",
+                "collection": "91a7b528-80eb-42ed-a74d-c6fbd5a26116"
+            },
+            "2": {
+                "api_root": "trustgroup1",
+                "collection": "52892447-4d7e-4f70-b94d-d7f22742ff63"
+            }
+        },
+        "version": {
+            "TAXII": "v21",
+            "STIX": "v20"
+        }
+    }
+}
