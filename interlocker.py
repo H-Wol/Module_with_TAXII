@@ -112,7 +112,7 @@ def upload(conf):
 
     url = configure_url(conf)
 
-    if confirm_Connection(conf,taxii):
+    if confirm_Connection(conf,taxii,inter_error_logger):
         inter_error_logger.error("Server Connection Error {}".format(url))
         return 0
 

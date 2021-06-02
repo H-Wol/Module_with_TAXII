@@ -2,7 +2,7 @@ import json
 import time
 import requests
 from datetime import datetime
-from logger import error_logger
+from logger import ipr_error_logger,iprcv_logger
 from urllib.parse import urlparse
 from utils import JsonConfigFileManager, load_module_func, configure_url, confirm_Connection, add_slash, del_slash
 from stix2 import MemoryStore
@@ -14,7 +14,7 @@ COLLECTION_SAVE_DIR = './collection'
 def select_collection(url,taxii,conf):
     collection_list = taxii.ApiRoot(url,user=conf.id, password=conf.pw).collections
     if collection_list == []:  
-        error_logger.error("There is no collection in that apiroot. URL : {}".format(url))
+        ipr_error_logger.error("There is no collection in that apiroot. URL : {}".format(url))
         return 0
     for num in range(len(collection_list)):
         print ("{}. {}".format(num+1,collection_list[num].title))
@@ -46,8 +46,8 @@ def main():
 
         url = configure_url(conf)
 
-        if confirm_Connection(conf,taxii):
-            error_logger.error("Server Connection Error {}".format(url))
+        if confirm_Connection(conf,taxii,ipr_error_logger):
+            ipr_error_logger.error("Server Connection Error {}".format(url))
             continue
 
         for num in conf.detail:
@@ -69,7 +69,7 @@ def main():
             collection = taxii.Collection(url,user=conf.id, password=conf.pw)
 
             if not collection.can_read:
-                error_logger.error("Selected collection cannot be read. URL : {}".format(url))
+                ipr_error_logger.error("Selected collection cannot be read. URL : {}".format(url))
                 continue
 
             # collection_objects = MemoryStore()

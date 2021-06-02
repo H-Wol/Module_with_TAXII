@@ -66,18 +66,22 @@ def configure_url(conf,*args):
         
     return url
 
-def confirm_Connection(conf,taxii):
+def confirm_Connection(conf,taxii,logger):
     retry = conf.retry
     count = 1
     url = configure_url(conf,'discovery')
+    
     while 1:
         try:
+            print(url)
             server = taxii.Server(url, user=conf.id, password=conf.pw).title
+            print(server)
             return 0
         except Exception as e:
             count += 1
-            if count == retry:
-                return 1
+            if count > retry:
+                logger.error("Server Connection Error {}".format(url))
+                break
 
 def add_slash(string):
     if string[-1] == "/":
